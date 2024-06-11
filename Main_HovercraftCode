@@ -1,0 +1,87 @@
+#define F_CPU 16000000UL  // Define the clock speed of Atmega 328 as 16 MHz
+#include <avr/io.h>
+#include <util/delay.h>
+#include "Wire.h"
+#include <MPU6050_light.h>
+#include <Servo.h> // although i think this is not allowed and we will have to not use libraries for the final code
+uint8_t duty = 0;
+
+MPU6050 mpu(Wire);
+Servo servo;
+int servoPin = 9;
+int direction = 0; // the way the servo should be facing in order to keep it in control
+int pos = 0;    // variable to store the servo position
+long timer = 0;
+
+void setup() {
+  Serial.begin(9600);
+  servo.attach(servoPin);
+
+  //connect and configure IMU
+  Wire.begin();
+  byte status = mpu.begin();
+
+  //Gyroscope configurations : 
+  // 0 -> range = +- 250 deg/s
+  // 1 -> range = +- 500 deg/s
+  // 2 -> range = +- 1000 deg/s
+  // 3 -> range = +- 2000 deg/s
+  mpu.setGyroConfig(0);//0
+
+  // Acceleration configurations : 
+  // 0 -> range = +- 2 g
+  // 1 -> range = +- 4 g
+  // 2 -> range = +- 8 g
+  // 3 -> range = +- 16 g
+  mpu.setAccConfig(1);
+
+  Serial.print(F("MPU6050 status: "));
+  Serial.println(status);
+  while(status!=0){ } // stop everything if could not connect to MPU6050
+
+  //Calibrate IMU
+  Serial.println(F("Calculating offsets, do not move MPU6050"));
+  delay(1000);
+  mpu.calcOffsets(true,true); // gyro and accelero
+  Serial.println("Done!\n");
+
+  direction = mpu.getAngleZ();
+
+}
+
+int findTurnAngle() {
+  // turn off fans
+  // turn servo left
+  // turn servo right
+  // return the direction servo must turn
+}
+
+void moveForward(){
+  
+  //turn fan on
+
+}
+
+void Stop() {
+  // turn fans off
+}
+
+bool checkForWall() {
+  // if sensorDistance <= 10cm return True;
+  else return False;
+}
+
+void pointServo() {
+  //code to keep the servo in the right direction to keep it from spinning hovercraft
+}
+
+void loop() {
+  
+  mpu.update();
+  moveForward();
+  if (checkForWall()) {
+    Stop();
+    servo.write(findTurnAngle());
+  }
+
+}
